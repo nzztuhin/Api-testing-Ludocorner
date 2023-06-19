@@ -1,0 +1,328 @@
+{
+	"info": {
+		"_postman_id": "b316ac11-2b7b-4071-b2e2-5a26c342f0a0",
+		"name": "Ludocorner",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24024013"
+	},
+	"item": [
+		{
+			"name": "LogIn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var tokenData = pm.response.json()\r",
+							"\r",
+							"\r",
+							"if(tokenData.data.token){\r",
+							"pm.test(\"Login successfull\")\r",
+							"pm.environment.set(\"token\",tokenData.data.token)\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"test.user@gmail.com\",\r\n    \"password\":\"12345678\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show Product",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var page = pm.collectionVariables.get(\"page\");\r",
+							"if(!page){\r",
+							"    pm.request.url.query.remove(\"page\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Products request successful\")\r",
+							"\r",
+							"if(jsonData.products.next_page_url){    \r",
+							"     pm.collectionVariables.set(\"page\", jsonData.products.current_page + 1)\r",
+							"     postman.setNextRequest(\"Show Product\")\r",
+							" }\r",
+							"else(\r",
+							"    console.log(\"we are done!\")\r",
+							")"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/product/view_product/?page={{page}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"product",
+						"view_product",
+						""
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "{{page}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Single Product",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Is their any product\", () => {\r",
+							"    pm.expect(jsonData[\"products\"]).to.not.equal(null);\r",
+							"    if(jsonData.products = null){\r",
+							"        console.log(\"no product found\")\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Is their any image\", () => {\r",
+							"    pm.expect(jsonData[\"products.image\"]).to.not.equal(null);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/product/view_single_product/15",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"product",
+						"view_single_product",
+						"15"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n     \"product_id\":\"6\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/cart/add_cart",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"cart",
+						"add_cart"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show Cart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Status code is 200\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/cart/view_cart",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"cart",
+						"view_cart"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "page",
+			"value": ""
+		}
+	]
+}
